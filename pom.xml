@@ -1,0 +1,22 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.github.teilzeitstudent.restserver-standalone</groupId>
+    <artifactId>camel-restserver-standalone-parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Standlone REST server</name>
+    <description>REST server, based on Camel. Can be started without deploying to a container</description>
+    <properties>
+        <java.version>1.8</java.version>
+    </properties>
+
+    <build>
+        <defaultGoal>install</defaultGoal>
+    </build>
+    <modules>
+        <module>model</module>
+        <module>serviceA</module>
+        <module>dist</module>
+    </modules>
+</project>

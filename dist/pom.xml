@@ -1,0 +1,107 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.github.teilzeitstudent.restserver-standalone</groupId>
+        <artifactId>camel-restserver-standalone-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>dist</artifactId>
+    
+    <dependencies>
+        <!--
+            Projects you want to run
+            
+            The copy-dependencies plugin will automatically pull in
+            all transitive dependencies as well 
+         -->
+        <dependency>
+            <artifactId>model</artifactId>
+            <groupId>com.github.teilzeitstudent.restserver-standalone</groupId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <artifactId>serviceA</artifactId>
+            <groupId>com.github.teilzeitstudent.restserver-standalone</groupId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        
+        <!--
+            Dependencies needed as part of running this via java -jar 
+         -->
+        <!-- Wild guess here. OSGI version 5 is ok? -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>5.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <version>5.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-core</artifactId>
+            <version>2.18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-spring</artifactId>
+            <version>2.18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-spring-javaconfig</artifactId>
+            <version>2.18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-test-blueprint</artifactId>
+            <version>2.18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-cdi</artifactId>
+            <version>2.18.0</version>
+        </dependency>
+    </dependencies>
+    
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                <name>env.BUNDLE_STUFF</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>appassembler-maven-plugin</artifactId>
+                        <version>1.10</version>
+                        <executions>
+                            <execution>
+                                <id>build-stuff</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>assemble</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <programs>
+                                <program>
+                                <mainClass>org.apache.camel.test.blueprint.Main</mainClass>
+                                <id>app</id>
+                            </program>
+                            </programs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

@@ -1,0 +1,6 @@
+/target/
+/.settings/
+.classpath
+.project
+*.swp
+/dependency-reduced-pom.xml

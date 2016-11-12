@@ -1,0 +1,1 @@
+web: sh dist/target/appassembler/bin/app

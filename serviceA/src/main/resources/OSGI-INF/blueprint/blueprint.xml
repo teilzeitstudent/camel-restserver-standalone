@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:cxf="http://camel.apache.org/schema/blueprint/cxf"
+        xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+        xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
+        xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+                            http://camel.apache.org/schema/blueprint http://camel.apache.org/schema/blueprint/camel-blueprint.xsd">
+    
+    <cm:property-placeholder persistent-id="com.capgemini.example" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="hostname" value="localhost"/>
+            <cm:property name="port" value="8080"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+    
+    <cxf:rsServer id="exampleServer" 
+            address="http://${hostname}:${port}/greeting"
+            loggingFeatureEnabled="false"
+            serviceClass="com.github.teilzeitstudent.restserverstandalone.servicea.API">
+        <cxf:providers>
+            <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
+        </cxf:providers>
+    </cxf:rsServer>
+    
+    <bean id="getProcessor" class="com.github.teilzeitstudent.restserverstandalone.servicea.GetProcessor" />
+    
+    <camelContext xmlns="http://camel.apache.org/schema/blueprint">
+    <dataFormats>
+        <json id="jack" library="Jackson" />
+        <xmljson id="xmljson"/>
+    </dataFormats>
+        <!--
+            This route will accept all incoming requests and route
+            them to action- specific routes.
+            No actual processing takes place here.
+         -->
+        <route id="restProcessing">
+            <from uri="cxfrs:bean:exampleServer?bindingStyle=SimpleConsumer&amp;preformInvocation=false" />
+            <to uri="log:recievedRequest?level=INFO&amp;showAll=true&amp;multiline=true" />
+            <choice>
+                <when>
+                    <simple>${header.operationName} == 'getHello'</simple>
+                    <to uri="direct:getHello" />
+                </when>
+                
+                <when>
+                    <simple>${header.operationName} == 'postHello'</simple>
+                    <to uri="direct:postHello" />
+                </when>
+                
+                <otherwise>
+                    <setBody><simple>Fail</simple></setBody>
+                </otherwise>
+            </choice>
+        </route>
+        
+        <route id="routeGetHello">
+            <from uri="direct:getHello" />
+            <to uri="log:recievedGreeting?level=INFO&amp;showAll=true&amp;multiline=true" />
+            <process ref="getProcessor" />
+        </route>
+        
+        <route id="routePostHello">
+            <from uri="direct:postHello" />
+            <to uri="log:recievedGreeting?level=INFO&amp;showAll=true&amp;multiline=true" />
+            
+            <choice>
+                <when>
+                    <simple>${header.Content-Type} =~ 'application/json'</simple>
+                    <unmarshal ref="xmljson" />
+                    <setHeader headerName="Content-Type">
+                        <constant>application/xml</constant>
+                    </setHeader>
+                </when>
+            </choice>
+            
+            <to uri="xslt:response.xslt" />
+            
+            <choice>
+                <when>
+                    <simple>${header.Content-Type} =~ 'application/xml' and ${header.Accept} =~ 'application/json'</simple>
+                    <marshal ref="xmljson" />
+                    <setHeader headerName="Content-Type">
+                        <constant>application/json</constant>
+                    </setHeader>
+                </when>
+            </choice>
+            
+        </route>
+    </camelContext>
+
+</blueprint>
